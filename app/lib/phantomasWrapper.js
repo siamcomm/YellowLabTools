@@ -1,9 +1,11 @@
 /**
- * Yellow Lab Tools main file
+ * Launches the phantomas tool with correct options
  */
 
 var async           = require('async');
 var phantomas       = require('phantomas');
+var jsStringEscape  = require('js-string-escape');
+var httpProxy       = require('./httpProxy');
 
 var PhantomasWrapper = function() {
     'use strict';
@@ -26,18 +28,19 @@ var PhantomasWrapper = function() {
             // Mandatory
             reporter: 'json:pretty',
             'analyze-css': true,
+            proxy: task.options.jsTiming ? 'localhost:3838' : null,
             'skip-modules': [
-                'blockDomains', // not needed
-                'analyzeCss', // overriden
-                'domComplexity', // overriden
-                'domMutations', // not compatible with webkit
-                'domQueries', // overriden
-                'eventListeners', // overridden
-                'filmStrip', // not needed
-                'har', // not needed for the moment
-                'pageSource', // not needed
-                'screenshot', // not needed for the moment
-                'waitForSelector', // not needed
+                'blockDomains',     // not needed
+                'analyzeCss',       // overriden
+                'domComplexity',    // overriden
+                'domMutations',     // not compatible with webkit
+                'domQueries',       // overriden
+                'eventListeners',   // overridden
+                'filmStrip',        // not needed
+                'har',              // not needed for the moment
+                'pageSource',       // not needed
+                'screenshot',       // not needed for the moment
+                'waitForSelector',  // not needed
                 'windowPerformance' // overriden
             ].join(','),
             'include-dirs': [
@@ -60,6 +63,21 @@ var PhantomasWrapper = function() {
             // Forever will restart the server
             process.exit(1);
         }, 600000);
+
+        // Start the http proxy for JS timing (if needed)
+        var jsTimingProxy;
+        if (task.options.jsTiming) {
+            jsTimingProxy = new httpProxy();
+            jsTimingProxy.start(3838, function(bodyBuffer, $url, $index) {
+
+                // Inspired by https://github.com/etsy/DeviceTiming
+                var head = new Buffer('__phantomas.jsTimers[' + $index + '] = new __phantomas.jsTimer("' + $url + '");\neval("__phantomas.jsTimers[' + $index + '].parsed();\\n');
+                var body = new Buffer(jsStringEscape(bodyBuffer));
+                var foot = new Buffer('");\n__phantomas.jsTimers[' + $index + '].end();');
+
+                return Buffer.concat([head, body, foot]);
+            });
+        }
 
         // It's time to launch the test!!!
         var triesNumber = 3;
@@ -92,6 +110,10 @@ var PhantomasWrapper = function() {
         }, function(err, data) {
 
             clearTimeout(killer);
+
+            if (task.options.jsTiming) {
+                jsTimingProxy.stop();
+            }
 
             if (err) {
                 console.log('All ' + triesNumber + ' attemps failed for test id ' + task.testId);

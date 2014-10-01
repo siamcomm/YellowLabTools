@@ -18,6 +18,8 @@ var resultsController       = require('./app/node_controllers/resultsController'
 var waitingQueueSocket      = require('./app/node_controllers/waitingQueueSocket');
 var testQueue               = require('./app/lib/testQueue');
 
+
+// Server middlewares
 app.use(compress());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -55,5 +57,5 @@ if (!fs.existsSync(resultsPath)) {
 
 // Launch the server
 server.listen(settings.serverPort, function() {
-    console.log('Listening on port %d', server.address().port);
+    console.log('Server listening on port %d', server.address().port);
 });
