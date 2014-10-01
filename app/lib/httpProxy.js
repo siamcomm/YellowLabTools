@@ -73,7 +73,7 @@ var HttpProxy = function() {
 
                     if (isJavascript()) {
 
-                        if (isGziped) {
+                        if (isGziped()) {
                             
                             // Unzip the file
                             zlib.gunzip(buffer, function(err, dezipped) {
@@ -105,7 +105,7 @@ var HttpProxy = function() {
                         } else {
                             // Not gziped
                             // Transform!
-                            var newBody = modifyFn(dezipped, req.url, index);
+                            var newBody = modifyFn(buffer, req.url, index);
                             _headers['content-length'] = newBody.length;
                             sendResponse(_statusCode, _headers, newBody);
 
