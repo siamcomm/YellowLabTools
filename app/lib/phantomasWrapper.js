@@ -5,7 +5,7 @@
 var async           = require('async');
 var phantomas       = require('phantomas');
 var jsStringEscape  = require('js-string-escape');
-var httpProxy       = require('./httpProxy');
+var httpProxy       = require('script-timing-proxy');
 
 var PhantomasWrapper = function() {
     'use strict';

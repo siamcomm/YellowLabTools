@@ -24,6 +24,9 @@ var launchTestController = function(req, res, testQueue, googleAnalyticsId) {
         options.timeout = req.body.timeout;
     }
 
+    // Enable HTTP proxy for script timing
+    options.jsTiming = true;
+
     async.waterfall([
         
         function htmlTemplate(callback) {
