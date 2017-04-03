@@ -1,22 +1,153 @@
 .promess {
-  padding: 0em 2em 3em;
+  padding: 0em 2em;
+  margin-bottom: 0.5em;
   font-weight: normal;
   font-size: 1.2em;
+}
+.price {
+  padding: 0em 2em 3em;
+  margin-top: 0em;
+  font-size: 0.9em;
 }
 .url {
   width: 50%;
 }
 .launchBtn {
-  background: #e74c3c;
+  background: #ffa319;
   color: #fff;
+}
+.launchBtn:focus {
+  background: #e74c3c;
 }
 .launchBtn.disabled {
   background: #deaca6;
 }
+.launchBtn.disabled:focus {
+  color: #ddd;
+}
+.settings {
+  width: 50%;
+  margin: 0 auto;
+}
+.settings input,
+.settings select {
+  font-size: 1em;
+}
+.settings input[type=text],
+.settings input[type=password],
+.settings textarea {
+  width: 100%;
+  min-width: 4em;
+}
+.device {
+  margin-top: 3em;
+}
+.device .item {
+  display: inline-block;
+  margin: 1em 0.75em;
+  width: 5.5em;
+  height: 5.5em;
+  color: #FFF;
+  border: 1px solid #FFF;
+  padding: 1px;
+  border-radius: 0.5em;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.8em;
+}
+.device .item.active {
+  color: #ffa319;
+  border: 2px solid #ffa319;
+  padding: 0;
+}
+.device .item:hover {
+  color: #ffa319;
+}
+.device .item > div {
+  margin: 0.2em 0 0.1em;
+  font-size: 3em;
+}
+.settingsTooltip {
+  position: relative;
+}
+.settingsTooltip span {
+  font-size: 0.8em;
+  vertical-align: text-top;
+}
+.settingsTooltip div {
+  display: none;
+  position: absolute;
+  padding: 0.5em;
+  width: 25em;
+  background: #FFF;
+  color: #000;
+  font-size: 0.8em;
+  border-radius: 1em;
+  border: 2px solid #ffa319;
+  white-space: normal;
+  z-index: 2;
+}
+.settingsTooltip:hover div {
+  display: block;
+}
+.showAdvanced {
+  display: inline-block;
+  margin-top: 2em;
+  color: #FFF;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+.showAdvanced:hover {
+  color: #ffa319;
+}
+.currentSettings {
+  font-size: 0.9em;
+}
+.currentSettings span {
+  color: #ffa319;
+}
+.currentSettings span:after {
+  color: #FFF;
+  content: ",";
+}
+.currentSettings span:last-child:after {
+  content: "";
+}
+.advanced {
+  margin: 1em 0 0;
+  display: table;
+  width: 100%;
+  text-align: left;
+  border-spacing: 0.75em;
+}
+.advanced > div {
+  display: table-row;
+}
+.advanced > div > div {
+  display: table-cell;
+  width: 75%;
+}
+.advanced > div > div.label {
+  width: 25%;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.advanced .subTable {
+  display: table;
+  border-spacing: 0;
+  width: 100%;
+}
+.advanced .subTable > div {
+  display: table-row;
+}
+.advanced .subTable > div > div {
+  display: table-cell;
+  padding: 0 0 0.75em;
+}
 .features {
   display: table;
   width: 50%;
-  margin: 8em auto 0;
+  margin: 6em auto 0;
   font-size: 0.9em;
   color: #413;
 }

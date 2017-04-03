@@ -1,6 +1,13 @@
 <div ng-include="'views/resultSubHeader.html'"></div>
 <div class="summary board">
     
+    <div ng-if="result.blockedRequests">
+        <b><ng-pluralize count="result.blockedRequests.length" when="{'0': 'No blocked request', 'one': '1 blocked request', 'other': '{} blocked requests'}"></ng-pluralize>:</b>
+        <div ng-repeat="request in result.blockedRequests track by $index">
+            {{request}}
+        </div>
+    </div>
+
     <div class="globalScore" ng-if="globalScore === 0 || globalScore > 0">
         <div>
             <h2>Global score</h2>
@@ -10,10 +17,11 @@
             </div>
         </div>
         <div>
-            <a href="/result/{{result.runId}}/screenshot">
-                <div class="screenshotWrapper desktop">
+            <a href="result/{{result.runId}}/screenshot">
+                <div class="screenshotWrapper" ng-class="result.params.options.device || 'desktop'">
                     <div>
-                        <img class="screenshotImage" ng-src="{{result.screenshotUrl}}"/>
+                        <img ng-if="result.screenshotUrl" class="screenshotImage" ng-src="{{result.screenshotUrl}}"/>
+                        <span ng-if="!result.screenshotUrl" class="screenshotError">Screenshot not available</span>
                     </div>
                 </div>
             </a>
@@ -27,27 +35,28 @@
             <div class="category">{{category.label}}</div>
             <div class="criteria">
                 <div class="table" title="Click to see details">
-                    <div ng-repeat="ruleName in category.rules" ng-if="result.rules[ruleName]" ng-init="rule = result.rules[ruleName]"
-                         ng-class="{'warning': rule.abnormal}" ng-click="showRulePage(ruleName)">
+                    <a ng-repeat="ruleName in category.rules" ng-if="result.rules[ruleName]" ng-init="rule = result.rules[ruleName]"
+                         ng-class="{'warning': rule.abnormal}" href="result/{{runId}}/rule/{{ruleName}}">
                         <div class="grade">
                             <grade score="rule.score"></grade>
                         </div>
                         <div class="label">{{rule.policy.label}}</div>
                         <div class="result">
-                            {{rule.value}}
+                            <span ng-if="rule.policy.unit == 'bytes'">{{rule.value | bytes}}</span>
+                            <span ng-if="rule.policy.unit != 'bytes'">{{rule.value}}</span>
                             <span ng-if="rule.abnormal" class="icon-warning"></span>
                             <span ng-if="rule.abnormalityScore <= -100" class="icon-warning"></span>
                             <span ng-if="rule.abnormalityScore <= -300" class="icon-warning"></span>
                         </div>
                         <div class="info"><span class="icon-question"></span></div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <div ng-if="!error && !fromSocialShare" class="apiTip">
-        <b>Did you know? Yellow Lab Tools now has an API</b>! <a href="{{getAPIUrl()}}" target="_blank">Here</a> is the JSON output for this run. Checkout <a href="https://github.com/gmetais/YellowLabTools/wiki/Public-API" target="_blank">the API doc</a>.
+        <b>Did you know?</b> You can <b>bookmark</b> this result page URL or <b>share it</b>, Yellow Lab Tools keeps test results for years!
     </div>
 
     <div class="tweet" ng-if="!error && !fromSocialShare">
@@ -61,7 +70,7 @@
     <div class="fromShare" ng-if="!error && fromSocialShare">
         <p>Yellow Lab Tools is a free online tool that analyzes performance and front-end quality.</p>
         <a class="linkButton" href="" ng-click="seeFullReport()">See the full report for this page</a>
-        <a class="linkButton" href="/">Test another webpage</a>
+        <a class="linkButton" href="<%= baseUrl %>">Test another webpage</a>
     </div>
 
     <div ng-if="error">

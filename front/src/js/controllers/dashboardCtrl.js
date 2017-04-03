@@ -8,7 +8,7 @@ dashboardCtrl.controller('DashboardCtrl', ['$scope', '$rootScope', '$routeParams
     function loadResults() {
         // Load result if needed
         if (!$rootScope.loadedResult || $rootScope.loadedResult.runId !== $routeParams.runId) {
-            Results.get({runId: $routeParams.runId}, function(result) {
+            Results.get({runId: $routeParams.runId, exclude: 'toolsResults'}, function(result) {
                 $rootScope.loadedResult = result;
                 $scope.result = result;
                 init();
@@ -26,29 +26,26 @@ dashboardCtrl.controller('DashboardCtrl', ['$scope', '$rootScope', '$routeParams
         $scope.categoriesOrder = Object.keys($scope.result.scoreProfiles.generic.categories);
         
         $scope.globalScore = Math.max($scope.result.scoreProfiles.generic.globalScore, 0);
-        $scope.tweetText = 'My website\'s score is ' + $scope.globalScore + '/100 on #YellowLabTools!';
+
+        $scope.tweetText = 'I\'ve discovered this cool open-source tool that audits the front-end quality of a web page: ';
     }
 
-    $scope.showRulePage = function(ruleName) {
-        $location.path('/result/' + $scope.runId + '/rule/' + ruleName);
-    };
-
     $scope.testAgain = function() {
-        API.launchTest($scope.result.params.url);
+        API.relaunchTest($scope.result);
     };
 
-    /// When comming from a social shared link, the user needs to click on "See full report" button to display the full dashboard.
+    // When comming from a social shared link, the user needs to click on "See full report" button to display the full dashboard.
     $scope.seeFullReport = function() {
         $scope.fromSocialShare = false;
         $location.search({});
     };
 
     $scope.shareOnTwitter = function(message) {
-        openSocialPopup('https://twitter.com/intent/tweet?url=' + document.URL + '%3Fshare&text=' + encodeURIComponent(message));
+        openSocialPopup('https://twitter.com/intent/tweet?text=' + encodeURIComponent(message + 'http://yellowlab.tools'));
     };
 
     $scope.shareOnLinkedin = function(message) {
-        openSocialPopup('https://www.linkedin.com/shareArticle?mini=true&url=' + document.URL + '%3Fshare&title=' + encodeURIComponent(message) + '&summary=' + encodeURIComponent('YellowLabTools is a free online tool that analyzes performance and front-end quality of a webpage.'));
+        openSocialPopup('https://www.linkedin.com/shareArticle?mini=true&url=http://yellowlab.tools&title=' + encodeURIComponent(message) + '&summary=' + encodeURIComponent('YellowLabTools is a free online tool that analyzes performance and front-end quality of a webpage.'));
     };
 
     function openSocialPopup(url) {
@@ -58,11 +55,6 @@ dashboardCtrl.controller('DashboardCtrl', ['$scope', '$rootScope', '$routeParams
         var winLeft = (screen.width / 2) - (winWidth / 2);
         window.open(url, 'sharer', 'top=' + winTop + ',left=' + winLeft + ',toolbar=0,status=0,width=' + winWidth + ',height=' + winHeight);
     }
-
-    // Returns the URL of the JSON result
-    $scope.getAPIUrl = function() {
-        return '/api/results/' + $scope.runId;
-    };
 
     loadResults();
 }]);

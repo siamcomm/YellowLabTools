@@ -7,10 +7,9 @@ screenshotCtrl.controller('ScreenshotCtrl', ['$scope', '$rootScope', '$routePara
     function loadResults() {
         // Load result if needed
         if (!$rootScope.loadedResult || $rootScope.loadedResult.runId !== $routeParams.runId) {
-            Results.get({runId: $routeParams.runId}, function(result) {
+            Results.get({runId: $routeParams.runId, exclude: 'toolsResults'}, function(result) {
                 $rootScope.loadedResult = result;
                 $scope.result = result;
-                init();
             }, function(err) {
                 $scope.error = true;
             });
@@ -24,7 +23,7 @@ screenshotCtrl.controller('ScreenshotCtrl', ['$scope', '$rootScope', '$routePara
     };
 
     $scope.testAgain = function() {
-        API.launchTest($scope.result.params.url);
+        API.relaunchTest($scope.result);
     };
 
     loadResults();

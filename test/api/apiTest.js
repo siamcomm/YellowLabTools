@@ -31,6 +31,7 @@ describe('api', function() {
             },
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': 'invalid'
             }
         }, function(error, response, body) {
@@ -49,10 +50,12 @@ describe('api', function() {
             method: 'POST',
             url: serverUrl + '/api/runs',
             body: {
-                url: ''
+                url: '',
+                waitForResponse: true
             },
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': Object.keys(config.authorizedKeys)[0]
             }
         }, function(error, response, body) {
@@ -76,6 +79,7 @@ describe('api', function() {
             },
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': Object.keys(config.authorizedKeys)[0]
             }
         }, function(error, response, body) {
@@ -96,10 +100,16 @@ describe('api', function() {
             body: {
                 url: wwwUrl + '/simple-page.html',
                 waitForResponse: true,
-                screenshot: true
+                screenshot: true,
+                device: 'tablet',
+                //waitForSelector: '*',
+                cookie: 'foo=bar;domain=google.com',
+                authUser: 'joe',
+                authPass: 'secret'
             },
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': Object.keys(config.authorizedKeys)[0]
             }
         }, function(error, response, body) {
@@ -128,6 +138,7 @@ describe('api', function() {
             },
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': Object.keys(config.authorizedKeys)[0]
             }
         }, function(error, response, body) {
@@ -159,7 +170,16 @@ describe('api', function() {
                 body.should.have.a.property('scoreProfiles').that.is.an('object');
                 body.should.have.a.property('rules').that.is.an('object');
                 body.should.have.a.property('toolsResults').that.is.an('object');
+
                 body.should.have.a.property('javascriptExecutionTree').that.is.an('object');
+                body.javascriptExecutionTree.should.not.deep.equal({});
+
+                // Check if settings are correctly sent and retrieved
+                body.params.options.should.have.a.property('device').that.equals('tablet');
+                //body.params.options.should.have.a.property('waitForSelector').that.equals('*');
+                body.params.options.should.have.a.property('cookie').that.equals('foo=bar;domain=google.com');
+                body.params.options.should.have.a.property('authUser').that.equals('joe');
+                body.params.options.should.have.a.property('authPass').that.equals('secret');
 
                 // Check if the screenshot temporary file was correctly removed
                 body.params.options.should.not.have.a.property('screenshot');
@@ -167,7 +187,7 @@ describe('api', function() {
                 body.should.not.have.a.property('screenshotBuffer');
                 // Check if the screenshot url is here
                 body.should.have.a.property('screenshotUrl');
-                body.screenshotUrl.should.equal('/api/results/' + body.runId + '/screenshot.jpg');
+                body.screenshotUrl.should.equal('api/results/' + body.runId + '/screenshot.jpg');
 
                 screenshotUrl = body.screenshotUrl;
 
@@ -188,10 +208,12 @@ describe('api', function() {
             url: serverUrl + '/api/runs',
             body: {
                 url: wwwUrl + '/simple-page.html',
-                waitForResponse: false
+                waitForResponse: false,
+                jsTimeline: true
             },
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': Object.keys(config.authorizedKeys)[0]
             }
         }, function(error, response, body) {
@@ -216,6 +238,7 @@ describe('api', function() {
             url: serverUrl + '/api/runs/' + asyncRunId,
             json: true,
             headers: {
+                'Content-Type': 'application/json',
                 'X-Api-Key': Object.keys(config.authorizedKeys)[0]
             }
         }, function(error, response, body) {
@@ -528,12 +551,116 @@ describe('api', function() {
     });
 
 
+    it('should return the entire object and exclude toolsResults', function(done) {
+        this.timeout(5000);
+
+        request({
+            method: 'GET',
+            url: serverUrl + '/api/results/' + asyncRunId + '?exclude=toolsResults',
+            json: true,
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                
+                body.should.have.a.property('runId').that.equals(asyncRunId);
+                body.should.have.a.property('params').that.is.an('object');
+                body.should.have.a.property('scoreProfiles').that.is.an('object');
+                body.should.have.a.property('rules').that.is.an('object');
+                body.should.have.a.property('javascriptExecutionTree').that.is.an('object');
+                
+                body.should.not.have.a.property('toolsResults').that.is.an('object');
+
+                done();
+
+            } else {
+                done(error || response.statusCode);
+            }
+        });
+    });
+
+
+    it('should return the entire object and exclude params and toolsResults', function(done) {
+        this.timeout(5000);
+
+        request({
+            method: 'GET',
+            url: serverUrl + '/api/results/' + asyncRunId + '?exclude=toolsResults,params',
+            json: true,
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                
+                body.should.have.a.property('runId').that.equals(asyncRunId);
+                body.should.have.a.property('scoreProfiles').that.is.an('object');
+                body.should.have.a.property('rules').that.is.an('object');
+                body.should.have.a.property('javascriptExecutionTree').that.is.an('object');
+                
+                body.should.not.have.a.property('params').that.is.an('object');
+                body.should.not.have.a.property('toolsResults').that.is.an('object');
+
+                done();
+
+            } else {
+                done(error || response.statusCode);
+            }
+        });
+    });
+
+    it('should return the entire object and don\'t exclude anything', function(done) {
+        this.timeout(5000);
+
+        request({
+            method: 'GET',
+            url: serverUrl + '/api/results/' + asyncRunId + '?exclude=',
+            json: true,
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                
+                body.should.have.a.property('runId').that.equals(asyncRunId);
+                body.should.have.a.property('scoreProfiles').that.is.an('object');
+                body.should.have.a.property('rules').that.is.an('object');
+                body.should.have.a.property('javascriptExecutionTree').that.is.an('object');
+                body.should.have.a.property('params').that.is.an('object');
+                body.should.have.a.property('toolsResults').that.is.an('object');
+
+                done();
+
+            } else {
+                done(error || response.statusCode);
+            }
+        });
+    });
+
+    it('should return the entire object and don\'t exclude anything', function(done) {
+        this.timeout(5000);
+
+        request({
+            method: 'GET',
+            url: serverUrl + '/api/results/' + asyncRunId + '?exclude=null',
+            json: true,
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                
+                body.should.have.a.property('runId').that.equals(asyncRunId);
+                body.should.have.a.property('scoreProfiles').that.is.an('object');
+                body.should.have.a.property('rules').that.is.an('object');
+                body.should.have.a.property('javascriptExecutionTree').that.is.an('object');
+                body.should.have.a.property('params').that.is.an('object');
+                body.should.have.a.property('toolsResults').that.is.an('object');
+
+                done();
+
+            } else {
+                done(error || response.statusCode);
+            }
+        });
+    });
+
+
     it('should retrieve the screenshot', function(done) {
         this.timeout(5000);
 
         request({
             method: 'GET',
-            url: serverUrl + screenshotUrl
+            url: serverUrl + '/' + screenshotUrl
         }, function(error, response, body) {
             if (!error && response.statusCode === 200) {
                 response.headers['content-type'].should.equal('image/jpeg');
@@ -553,6 +680,30 @@ describe('api', function() {
             url: serverUrl + '/api/results/000000/screenshot.jpg'
         }, function(error, response, body) {
             if (!error && response.statusCode === 404) {
+                done();
+            } else {
+                done(error || response.statusCode);
+            }
+        });
+    });
+
+    it('should refuse a query on a blocked Url', function(done) {
+        this.timeout(5000);
+
+        request({
+            method: 'POST',
+            url: serverUrl + '/api/runs',
+            body: {
+                url: 'http://www.test.com/something.html',
+                waitForResponse: false
+            },
+            json: true,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Api-Key': Object.keys(config.authorizedKeys)[0]
+            }
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 403) {
                 done();
             } else {
                 done(error || response.statusCode);

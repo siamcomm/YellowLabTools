@@ -2,25 +2,23 @@
 
 cd /space/YellowLabTools
 
-# Stop the server
+# Stop the server and start the maintenance mode
 forever stopall
+forever start server_config/maintenance.js
 
 # Keep the settings.json file
 git stash
 git pull
 git stash pop
 
-# In case something was added in package.json or bower.json
+# In case something was added in package.json
 rm -rf node_modules
-npm install
-rm -rf bower_components
-bower install --config.interactive=false --allow-root
+npm install || exit 1
 
 # Front-end compilation
 rm -rf front/build
-npm install grunt-cli -g
-npm install phantomjs -g
 grunt build
 
-# Restart the server
-NODE_ENV=production forever start -c "node --stack-size=65500" bin/server.js
+# Stop the maintenance mode and restart the server
+forever stopall
+NODE_ENV=production forever start -c "node --stack-size=262000" bin/server.js

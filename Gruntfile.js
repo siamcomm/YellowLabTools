@@ -11,17 +11,18 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         settings: grunt.file.readJSON('./server_config/settings.json'),
         
-        font: {
+        webfont: {
             icons: {
-                src: ['front/src/fonts/svg-icons/*.svg'],
-                destCss: 'front/src/less/icons.less',
-                destFonts: 'front/src/fonts/icons.woff',
-
-                // Optional: Custom routing of font filepaths for CSS
-                cssRouter: function (fontpath) {
-                    var pathArray = fontpath.split('/');
-                    var fileName = pathArray[pathArray.length - 1];
-                    return '/fonts/' + fileName;
+                src: 'front/src/fonts/svg-icons/*.svg',
+                dest: 'tmp',
+                destCss: 'front/src/less',
+                options: {
+                    engine: 'node',
+                    types: 'woff',
+                    stylesheet: 'less',
+                    embed: true,
+                    htmlDemo: false,
+                    syntax: 'bootstrap'
                 }
             }
         },
@@ -66,7 +67,9 @@ module.exports = function(grunt) {
                 'app/nodeControllers/*.js',
                 'app/public/scripts/*.js',
                 'phantomas_custom/**/*.js',
-                'test/**/*.js',
+                'test/api/*.js',
+                'test/core/*.js',
+                'test/fixtures/*.js',
                 'front/src/js/**/*.js'
             ]
         },
@@ -92,15 +95,14 @@ module.exports = function(grunt) {
             },
             coverage: {
                 files: [
-                    {src: ['test/**'], dest: 'coverage/'},
-                    {src: ['lib/metadata/**'], dest: 'coverage/'},
-                    {src: ['node_modules/phantomas/**'], dest: 'coverage/'},
-                    {src: ['lib/tools/phantomas/custom_modules/**'], dest: 'coverage/'}
+                    {cwd: 'test', src: '**/*', dest: 'coverage/test', expand: true},
+                    {cwd: 'lib/metadata', src: '**/*', dest: 'coverage/lib/metadata', expand: true},
+                    {cwd: 'node_modules/phantomas', src: '**/*', dest: 'coverage/node_modules/phantomas', expand: true},
+                    {cwd: 'lib/tools/phantomas/custom_modules', src: '**/*', dest: 'coverage/lib/tools/phantomas/custom_modules', expand: true}
                 ]
             },
             build: {
                 files: [
-                    {src: ['./front/src/fonts/icons.woff'], dest: './front/build/fonts/icons.woff'},
                     {src: ['./front/src/img/favicon.png'], dest: './front/build/img/favicon.png'},
                     {src: ['./front/src/img/logo-large.png'], dest: './front/build/img/logo-large.png'},
                 ]
@@ -141,7 +143,7 @@ module.exports = function(grunt) {
                 options: {
                     reporter: 'spec',
                 },
-                src: ['test/core/offendersHelpersTest.js']
+                src: ['test/core/fontAnalyzerTest.js']
             },
             coverage: {
                 options: {
@@ -156,7 +158,7 @@ module.exports = function(grunt) {
             dev: {
                 NODE_ENV: 'development'
             },
-            builded: {
+            built: {
                 NODE_ENV: 'production'
             }
         },
@@ -169,7 +171,7 @@ module.exports = function(grunt) {
                     showStack: true
                 }
             },
-            builded: {
+            built: {
                 options: {
                     port: 8383,
                     server: './bin/server.js',
@@ -209,16 +211,14 @@ module.exports = function(grunt) {
             html: './front/build/main.html',
             css: './front/build/css/*.css',
             options: {
-                assetsDirs: ['front/build'],
-                patterns: {
-                    css: [[/(\/fonts\/icons\.woff)/gm, 'Replacing reference to icons.woff']]
-                }
+                assetsDirs: ['front/build']
             }
         },
         htmlmin: {
             options: {
                 removeComments: true,
-                collapseWhitespace: true
+                collapseWhitespace: true,
+                conservativeCollapse: true
             },
             main: {
                 files: [{
@@ -243,7 +243,11 @@ module.exports = function(grunt) {
             build: {
                 options: {
                     base: '.tmp',
-                    method: 'append'
+                    method: 'append',
+                    unescape: {
+                        '&lt;': '<',
+                        '&gt;': '>'
+                    }
                 },
                 files: {
                     './front/build/main.html': ['.tmp/views/*.html']
@@ -291,7 +295,7 @@ module.exports = function(grunt) {
 
 
     grunt.registerTask('icons', [
-        'font:icons',
+        'webfont:icons',
         'less',
         'clean:tmp'
     ]);
@@ -323,9 +327,9 @@ module.exports = function(grunt) {
         'express:dev'
     ]);
 
-    grunt.registerTask('builded', [
-        'env:builded',
-        'express:builded'
+    grunt.registerTask('built', [
+        'env:built',
+        'express:built'
     ]);
 
     grunt.registerTask('test', [
@@ -339,7 +343,6 @@ module.exports = function(grunt) {
         'copy:coverage',
         'express:test',
         'mochaTest:test',
-        'mochaTest:coverage',
         'clean:tmp'
     ]);
 

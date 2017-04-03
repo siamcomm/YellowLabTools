@@ -1,9 +1,31 @@
 {
     "categories": {
+        "pageWeight": {
+            "label": "Page weight",
+            "policies": {
+                "totalWeight": 5,
+                "imageOptimization": 2,
+                "gzipCompression": 2,
+                "fileMinification": 1
+            }
+        },
+        "requests": {
+            "label": "Requests",
+            "policies": {
+                "totalRequests": 5,
+                "domains": 3,
+                "notFound": 3,
+                "identicalFiles": 2,
+                "emptyRequests": 3,
+                "smallRequests": 1,
+                "lazyLoadableImagesBelowTheFold": 2,
+                "hiddenImages": 1
+            }
+        },
         "domComplexity": {
             "label": "DOM complexity",
             "policies": {
-                "DOMelementsCount": 1,
+                "DOMelementsCount": 3,
                 "DOMelementMaxDepth": 1,
                 "iframesCount": 1,
                 "DOMidDuplicated": 1
@@ -12,11 +34,16 @@
         "domManipulations": {
             "label": "DOM manipulations",
             "policies": {
-                "DOMinserts": 2,
-                "DOMqueries": 1,
-                "DOMqueriesWithoutResults": 2,
-                "DOMqueriesAvoidable": 2,
-                "eventsBound": 1
+                "DOMaccesses": 3,
+                "queriesWithoutResults": 1,
+                "DOMqueriesAvoidable": 1
+            }
+        },
+        "scroll": {
+            "label": "Scroll bottlenecks",
+            "policies": {
+                "eventsScrollBound": 1,
+                "DOMaccessesOnScroll": 4
             }
         },
         "badJavascript": {
@@ -24,21 +51,18 @@
             "policies": {
                 "jsErrors": 1,
                 "documentWriteCalls": 2,
+                "synchronousXHR": 5,
                 "consoleMessages": 0.5,
                 "globalVariables": 0.5
             }
         },
-        "jQueryVersion": {
-            "label": "jQuery version",
+        "jQuery": {
+            "label": "jQuery",
             "policies": {
-                "jQueryVersion": 5,
-                "jQueryVersionsLoaded": 0.1
-            }
-        },
-        "cssSyntaxError": {
-            "label": "CSS syntax errors",
-            "policies": {
-                "cssParsingErrors": 1
+                "jQueryVersion": 2,
+                "jQueryVersionsLoaded": 2,
+                "jQueryCallsOnEmptyObject": 1,
+                "jQueryNotDelegatedEvents": 1
             }
         },
         "cssComplexity": {
@@ -46,13 +70,16 @@
             "policies": {
                 "cssRules": 2,
                 "cssComplexSelectors": 2,
-                "cssComplexSelectorsByAttribute": 1.5,
-                "cssColors": 0.5
+                "cssColors": 0.5,
+                "similarColors": 0.5,
+                "cssBreakpoints": 0.5,
+                "cssMobileFirst": 1
             }
         },
         "badCSS": {
             "label": "Bad CSS",
             "policies": {
+                "cssParsingErrors": 4,
                 "cssImports": 3,
                 "cssDuplicatedSelectors": 2,
                 "cssDuplicatedProperties": 1,
@@ -61,55 +88,41 @@
                 "cssImportants": 3,
                 "cssOldIEFixes": 1,
                 "cssOldPropertyPrefixes": 1,
-                "cssUniversalSelectors": 1,
                 "cssRedundantBodySelectors": 1,
                 "cssRedundantChildNodesSelectors": 1
             }
         },
-        "requests": {
-            "label": "Requests number",
+        "fonts": {
+            "label": "Web fonts",
             "policies": {
-                "requests": 5,
-                "htmlCount": 0,
-                "jsCount": 1,
-                "cssCount": 1,
-                "imageCount": 0,
-                "webfontCount": 2,
-                "videoCount": 0,
-                "jsonCount": 0,
-                "otherCount": 0
+                "fontsCount": 1,
+                "heavyFonts": 1,
+                "unusedUnicodeRanges": 1
             }
         },
-        "smallRequests": {
-            "label": "Small requests",
+        "serverConfig": {
+            "label": "Server config",
             "policies": {
-                "smallJsFiles": 1,
-                "smallCssFiles": 1,
-                "smallImages": 1
-            }
-        },
-        "network": {
-            "label": "Network",
-            "policies": {
-                "notFound": 3,
-                "closedConnections": 3,
-                "multipleRequests": 3,
+                "http2": 2,
+                "closedConnections": 2,
+                "cachingNotSpecified": 1,
                 "cachingDisabled": 1,
-                "cachingTooShort": 1,
-                "domains": 1
+                "cachingTooShort": 1
             }
         }
     },
     "globalScore": {
-        "domComplexity": 1,
+        "pageWeight": 3,
+        "requests": 3,
+        "domComplexity": 2,
         "domManipulations": 2,
-        "badJavascript": 1,
-        "jQueryVersion": 1,
+        "scroll": 1,
+        "badJavascript": 2,
+        "jQuery": 1,
         "cssSyntaxError": 1,
         "cssComplexity": 1,
         "badCSS": 1,
-        "requests": 3,
-        "smallRequests": 1,
-        "network": 2
+        "fonts": 1,
+        "serverConfig": 1
     }
 }

@@ -1,7 +1,14 @@
 <div ng-include="'views/resultSubHeader.html'"></div>
 <div class="execution board">
-    <h2>Javascript Timeline</h2>
-    <p>This graph gives a quick view of when the Javascript interactions with the DOM occur during the loading of the page.</p>
+    <div class="selectScript" ng-class="{empty:!selectedScript}">
+        Filter timeline and profiler by script:
+        <select ng-model="selectedScript" ng-options="script.shortPath for script in scripts" ng-change="changeScript()">
+            <option value="">All (no filter)</option>
+        </select>
+    </div>
+
+    <h2>JavaScript Timeline</h2>
+    <p>This graph gives a quick view of when the JavaScript interactions with the DOM occur during the loading of the page.</p>
 
     <div class="timeline">
         <div class="chart">
@@ -9,18 +16,20 @@
                 <div ng-repeat="duration in timeline track by $index"
                      class="interval"
                      ng-class="{
-                        domCreation: $index * timelineIntervalDuration < result.toolsResults.phantomas.metrics.domInteractive,
-                        domInteractive: $index * timelineIntervalDuration >= result.toolsResults.phantomas.metrics.domInteractive
-                            && $index * timelineIntervalDuration < result.toolsResults.phantomas.metrics.domContentLoaded,
-                        domContentLoaded: $index * timelineIntervalDuration >= result.toolsResults.phantomas.metrics.domContentLoaded
-                            && $index * timelineIntervalDuration < result.toolsResults.phantomas.metrics.domContentLoadedEnd,
-                        domContentLoadedEnd: $index * timelineIntervalDuration >= result.toolsResults.phantomas.metrics.domContentLoadedEnd
-                            && $index * timelineIntervalDuration < result.toolsResults.phantomas.metrics.domComplete,
-                        domComplete: $index * timelineIntervalDuration >= result.toolsResults.phantomas.metrics.domComplete
+                        domCreation: $index * timelineIntervalDuration < result.javascriptExecutionTree.data.domInteractive,
+                        domInteractive: $index * timelineIntervalDuration >= result.javascriptExecutionTree.data.domInteractive
+                            && $index * timelineIntervalDuration < result.javascriptExecutionTree.data.domContentLoaded,
+                        domContentLoaded: $index * timelineIntervalDuration >= result.javascriptExecutionTree.data.domContentLoaded
+                            && $index * timelineIntervalDuration < result.javascriptExecutionTree.data.domContentLoadedEnd,
+                        domContentLoadedEnd: $index * timelineIntervalDuration >= result.javascriptExecutionTree.data.domContentLoadedEnd
+                            && $index * timelineIntervalDuration < result.javascriptExecutionTree.data.domComplete,
+                        domComplete: $index * timelineIntervalDuration >= result.javascriptExecutionTree.data.domComplete
                      }">
-                    <div style="height: {{100 * duration / timelineMax | number: 0}}px" class="color"></div>
+                    <div style="height: {{100 * duration / timelineMax | number: 0}}px" class="color" ng-class="{clickable: duration > 0}" scroll-on-click="{{$index * timelineIntervalDuration}}"></div>
                     <div class="tooltip detailsOverlay">
-                        <div>Timestamp: {{$index * timelineIntervalDuration | number: 0}} ms</div>
+                        <div>
+                            Timestamp: {{$index * timelineIntervalDuration | number: 0}} ms
+                        </div>
                     </div>
                 </div>
             </div>
@@ -36,7 +45,7 @@
                 <div class="domComplete"><div class="color"></div>Page is complete</div>
             </div>
             <div class="tips">
-                <div>Executing Javascript and DOM queries here is a <b>bad practice</b> and slows down the DOM construction.</div>
+                <div>Executing JavaScript and DOM queries here is a <b>bad practice</b> and slows down the DOM construction.</div>
                 <div>Some frameworks do things here, but it's not reliable and should be avoided.</div>
                 <div>Also known as "document ready". This is where you should execute <b>top-priority</b> scripts, like binding action buttons or launch a video player.</div>
                 <div>Here you can execute <b>mid-priority</b> tasks. Loading a script with createElement('script') is one way to do so.</div>
@@ -45,24 +54,36 @@
         </div>
     </div>
 
-    <h2>Javascript Profiler</h2>
+    <h2>JavaScript Profiler</h2>
     <p>
-        The table below shows the interactions between Javascript and the DOM. It is useful to understand what happens while the page loads.
+        The table below shows the interactions between the JavaScript and the DOM. It is useful to understand what happens while the page loads.
     </p>
     <div class="filters">
         <div>
-            <input type="checkbox" ng-model="warningsFilterOn" id="warningsFilterOn" />
-            <label for="warningsFilterOn">Show warnings only</label>
+            <input type="checkbox" name="warningsFilter" ng-model="warningsFilterOn" id="warningsFilterOn" />
+            <label for="warningsFilterOn">Filter on warnings and errors</label>
+            <div class="subFilters" ng-if="warningsFilterOn">
+                <div>
+                    <input type="checkbox" name="filters" ng-model="warningsFilters.queryWithoutResults" id="queryWithoutResultsFilterOn"/>
+                    <label for="queryWithoutResultsFilterOn">Queries without results</label>
+                </div>
+                <div>
+                    <input type="checkbox" name="filters" ng-model="warningsFilters.jQueryCallOnEmptyObject" id="jQueryCallOnEmptyObjectFilterOn" />
+                    <label for="jQueryCallOnEmptyObjectFilterOn">jQuery calls on empty object</label>
+                </div>
+                <div>
+                    <input type="checkbox" name="filters" ng-model="warningsFilters.eventNotDelegated" id="eventNotDelegatedFilterOn" />
+                    <label for="eventNotDelegatedFilterOn">Events not delegated</label>
+                </div>
+                <div>
+                    <input type="checkbox" name="filters" ng-model="warningsFilters.jsError" id="jsErrorFilterOn" />
+                    <label for="jsErrorFilterOn">Errors</label>
+                </div>
+            </div>
         </div>
-        <div>
-            <input type="checkbox" ng-model="textFilterOn" />
-            Filter by
-            <input type="text" ng-model="textFilter" placeholder="search..." class="textFilter" ng-change="textFilterOn = true" />
-        </div>
+        {{queryWithoutResultsFilterOn}}
     </div>
-    <div class="table">
-
-        <toto data-info="mavariable"></toto>
+    <div class="table" ng-class="{queryWithoutResultsFilterOn: warningsFilterOn && warningsFilters.queryWithoutResults, jQueryCallOnEmptyObjectFilterOn: warningsFilterOn && warningsFilters.jQueryCallOnEmptyObject, eventNotDelegatedFilterOn: warningsFilterOn && warningsFilters.eventNotDelegated, jsErrorFilterOn: warningsFilterOn && warningsFilters.jsError}">
         <div class="headers">
             <div><!-- index --></div>
             <div>Type</div>
@@ -70,74 +91,9 @@
             <div><!-- details --></div>
             <div>Timestamp</div>
         </div>
-        <div ng-if="(!warningsFilterOn || node.warning || node.error) && (!textFilterOn || !textFilter.length || node.searchIndex.indexOf(textFilter) >= 0)"
-             ng-repeat="node in profilerData" ng-class="{
-                showingDetails: node.showDetails,
-                jsError: node.error,
-                windowPerformance: node.windowPerformance
-            }">
 
-            <div class="index">{{$index + 1}}</div>
-            <div class="type">{{node.data.type}}</div>
+        <profiler-line ng-repeat="node in profilerData" data-index="$index" node="node"></profiler-line>
 
-            <div class="value">
-                {{node.data.callDetails.arguments[0]}}
-                <span ng-if="node.data.callDetails.arguments.length > 1"> : {{node.data.callDetails.arguments[1]}}</span>
-                <span ng-if="node.data.callDetails.arguments.length > 2"> : {{node.data.callDetails.arguments[2]}}</span>
-                <span ng-if="node.data.callDetails.arguments.length > 3"> : {{node.data.callDetails.arguments[3]}}</span>
-            </div>
-            
-            <div class="details">
-                <div ng-class="{'icon-question': !node.warning && !node.error, 'icon-warning': node.warning || node.error}"
-                     ng-click="onNodeDetailsClick(node)"
-                     ng-if="node.data.type != 'jQuery loaded' && node.data.type != 'jQuery version change' && !node.windowPerformance"></div>
-                
-                <div class="detailsOverlay" ng-if="node.showDetails">
-                    <div class="closeBtn" ng-click="onNodeDetailsClick(node)">✖</div>
-
-                    <div ng-if="node.data.callDetails.context.domElement">
-                        <h4>Called on DOM element</h4>
-                        <div>{{node.data.callDetails.context.domElement}}</div>
-                    </div>
-
-                    <div ng-if="node.data.callDetails.context.length === 0">
-                        <h4>Called on 0 jQuery element</h4>
-                        <p class="advice">Useless function call, as the jQuery object is empty.</p>
-                    </div>
-
-                    <div ng-if="node.data.callDetails.context.length == 1 && node.data.callDetails.context.firstElementPath">
-                        <h4>Called on 1 jQuery element</h4>
-                        <div>{{node.data.callDetails.context.firstElementPath}}</div>
-                    </div>
-
-                    <div ng-if="node.data.callDetails.context.length > 1">
-                        <h4>Called on {{node.data.callDetails.context.length}} jQuery elements</h4>
-                        <p class="advice" ng-if="node.data.type == 'jQuery - bind' && node.data.callDetails.context.length > 5">
-                            The .bind() method attaches the event listener to each jQuery element one by one. Using the .on() method is preferable if available (from v1.7).
-                        </p>
-                        <p ng-if="node.data.callDetails.context.firstElementPath"><b>First one is:</b> {{node.data.callDetails.context.firstElementPath}}</p>
-                    </div>
-
-                    <p class="advice" ng-if="node.data.resultsNumber === 0">
-                        The query returned 0 results. Could it be unused or dead code?
-                    </p>
-
-                    <div ng-if="node.parsedBacktrace">
-                        <h4>Backtrace</h4>
-                        <div class="table">
-                            <div ng-repeat="trace in node.parsedBacktrace track by $index">
-                                <div>{{trace.fnName || '(anonymous)'}}</div>
-                                <div class="trace"><a href="{{trace.filePath}}" title="{{trace.filePath}}" target="_blank">{{trace.fileName || 'HTML'}}</a>:{{trace.line}}</div>
-                            </div>
-                            <div ng-if="node.parsedBacktrace.length == 0 && node.data.type != 'script loaded'">
-                                <div>can't find any backtrace :/</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="startTime" ng-class="node.data.loadingStep">{{node.data.timestamp | number: 0}} ms</div>
-        </div>
     </div>
 
     <div class="backToDashboard"><a href="#" ng-click="backToDashboard()">Back to dashboard</a></div>

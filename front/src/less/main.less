@@ -126,11 +126,31 @@ a.linkButton {
 }
 
 
-.screenshotWrapper.desktop {
+.screenshotWrapper {
     display: inline-block;
     position: relative;
-    border: 0.2em solid #AAA;
     background: #000;
+
+    > div {
+        position: relative;
+        overflow: hidden;
+
+        &:hover {
+            overflow: auto;
+        }
+    }
+
+    .screenshotImage {
+        width: 100%;
+    }
+
+    .screenshotError {
+        color: #fff;
+    }
+}
+
+.screenshotWrapper.desktop {
+    border: 0.2em solid #AAA;
     padding: 0.5em;
     border-top-left-radius: 0.4em;
     border-top-right-radius: 0.4em;
@@ -160,20 +180,61 @@ a.linkButton {
     > div {
         width: 12em;
         height: 6.75em;
-        overflow: scroll;
-        position: relative;
-    }
-
-    .screenshotImage {
-        width: 100%;
     }
 }
 
+.screenshotWrapper.phone {
+    border: 0.07em solid #CCC;
+    padding: 1em 0.3em 1.5em;
+    border-radius: 0.6em;
 
-.star {
-    font-weight: bold;
-    span {
-        font-size: 1.2em;
+    &:before {
+        position: absolute;
+        width: 0.8em;
+        height: 0.8em;
+        bottom: 0.3em;
+        left: 3.3em;
+        border: 0.07em solid #CCC;
+        border-radius: 0.5em;
+        content: " ";
+    }
+
+    &:after {
+        position: absolute;
+        width: 1em;
+        height: 0.1em;
+        bottom: 13.9em;
+        left: 3.2em;
+        background: #555;
+        border-radius: 0.05em;
+        content: " ";
+    }
+
+    > div {
+        width: 6.75em;
+        height: 12em;
+    }
+}
+
+.screenshotWrapper.tablet {
+    border: 0.07em solid #CCC;
+    padding: 0.8em 0.5em 0.9em;
+    border-radius: 0.6em;
+
+    &:before {
+        position: absolute;
+        width: 0.5em;
+        height: 0.5em;
+        bottom: 0.15em;
+        left: 4.35em;
+        border: 0.07em solid #CCC;
+        border-radius: 0.4em;
+        content: " ";
+    }
+
+    > div {
+        width: 8.25em;
+        height: 11em;
     }
 }
 
@@ -186,27 +247,11 @@ a.linkButton {
     .version {
         font-size: 0.7em;
     }
+    .github {
+        margin: 1em 0 0 0.5em;
+    }
 }
 
-/* Icons */
-.icon-lab {
-    .icon(@lab);
-}
-.icon-question {
-    .icon(@question);
-}
-.icon-warning {
-    .icon(@warning);
-}
-.icon-back {
-    .icon(@arrow-left3);
-}
-.icon-summary {
-    .icon(@list);
-}
-.icon-spaghetti {
-    .icon(@bars);
-}
-.icon-loop {
-    .icon(@loop);
+[class^="icon-"]:before, [class*=" icon-"]:before {
+    vertical-align: baseline;
 }

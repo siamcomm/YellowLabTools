@@ -166,6 +166,81 @@ describe('offendersHelpers', function() {
             ]);
         });
 
+        it('should transform another backtrace syntax into an array', function() {
+            var result = offendersHelpers.backtraceToArray('phantomjs://webpage.evaluate():38 / e (http://s7.addthis.com/js/300/addthis_widget.js:1) / a (http://s7.addthis.com/js/300/addthis_widget.js:1) / http://s7.addthis.com/js/300/addthis_widget.js:3 / e (http://s7.addthis.com/js/300/addthis_widget.js:1) / http://s7.addthis.com/js/300/addthis_widget.js:8');
+
+            result.should.deep.equal([
+                {
+                    file: 'phantomjs://webpage.evaluate()',
+                    line: 38
+                },
+                {
+                    functionName: 'e',
+                    file: 'http://s7.addthis.com/js/300/addthis_widget.js',
+                    line: 1
+                },
+                {
+                    functionName: 'a',
+                    file: 'http://s7.addthis.com/js/300/addthis_widget.js',
+                    line: 1
+                },
+                {
+                    file: 'http://s7.addthis.com/js/300/addthis_widget.js',
+                    line: 3
+                },
+                {
+                    functionName: 'e',
+                    file: 'http://s7.addthis.com/js/300/addthis_widget.js',
+                    line: 1
+                },
+                {
+                    file: 'http://s7.addthis.com/js/300/addthis_widget.js',
+                    line: 8
+                }
+            ]);
+        });
+
+        it('should transform a backtrace with the new PhantomJS 2.x syntax into an array', function() {
+            var result = offendersHelpers.backtraceToArray('each@http://m.australia.fr/js/min/vendors.js?20160706185900:4:5365 / f@http://m.australia.fr/js/min/vendors.js?20160706185900:17:82 / http://m.australia.fr/js/min/vendors.js?20160706185900:17:855 / handle@http://m.australia.fr/js/min/vendors.js?20160706185900:5:10871 / report@phantomjs://platform/phantomas.js:535:20 / phantomjs://platform/phantomas.js:524:15');
+
+            result.should.deep.equal([
+                {
+                    functionName: 'each',
+                    file: 'http://m.australia.fr/js/min/vendors.js?20160706185900',
+                    line: 4,
+                    column: 5365
+                },
+                {
+                    functionName: 'f',
+                    file: 'http://m.australia.fr/js/min/vendors.js?20160706185900',
+                    line: 17,
+                    column: 82
+                },
+                {
+                    file: 'http://m.australia.fr/js/min/vendors.js?20160706185900',
+                    line: 17,
+                    column: 855
+                },
+                {
+                    functionName: 'handle',
+                    file: 'http://m.australia.fr/js/min/vendors.js?20160706185900',
+                    line: 5,
+                    column: 10871
+                },
+                {
+                    functionName: 'report',
+                    file: 'phantomjs://platform/phantomas.js',
+                    line: 535,
+                    column: 20
+                },
+                {
+                    file: 'phantomjs://platform/phantomas.js',
+                    line: 524,
+                    column: 15
+                }
+            ]);
+        });
+
         it('should return null if it fails', function() {
             var result = offendersHelpers.backtraceToArray('http://pouet.com/js/jquery.footer-transverse-min-v1.0.20.js:1 /http://pouet.com/js/main.js:1');
 
@@ -264,6 +339,17 @@ describe('offendersHelpers', function() {
                 offender: '.pagination .plus ul li'
             });
         });
+
+        it('should handle line breaks inside the string', function() {
+            var result = offendersHelpers.cssOffenderPattern('.card-mask-wrap { -moz-transform: translate3d(0, \n-288px\n, 0) } // was required by firefox 15 and earlier [inline CSS] @ 29:3');
+
+            result.should.deep.equal({
+                css: '.card-mask-wrap { -moz-transform: translate3d(0, -288px, 0) } // was required by firefox 15 and earlier',
+                file: null,
+                line: 29,
+                column: 3
+            });
+        }); 
 
     });
 

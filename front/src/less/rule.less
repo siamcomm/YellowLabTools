@@ -32,9 +32,18 @@
     margin: 0 auto 0.5em;
 }
 
+.rule h3 {
+    margin-bottom: 0em;
+}
+
+.rule .okThreshold {
+    font-style: italic;
+    font-size: 0.9em;
+}
+
 .rule .message {
     width: 80%;
-    margin: 0 auto;
+    margin: 1.5em auto;
     p {
         margin: 0.5em;
     }
@@ -90,7 +99,11 @@
     }
 }
 
-.offenders {
+.rule .startTime {
+    display: none;
+}
+
+.offendersTable, .value {
     .offenderButton {
         display: inline-block;
         position: relative;
@@ -99,6 +112,7 @@
         margin: 0.2em 0;
         border-radius: 0.4em;
         z-index: 1;
+        cursor: pointer;
 
         &.opens {
             padding-right: 0.75em;
@@ -120,6 +134,7 @@
             border-bottom-left-radius: 0.4em;
             border-bottom-right-radius: 0.4em;
             border-top: 1px solid #999;
+            z-index: 2;
         }
 
         .domTree {
@@ -140,7 +155,7 @@
             padding: 0.5em;
         }
 
-        &.opens.mouseOver {
+        &.opens:hover {
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
             background: #ffe0cc;
@@ -148,8 +163,13 @@
 
             > div {
                 display: block;
+                background: #ffe0cc;
             }
         }
+    }
+
+    .smallerOffenders {
+        font-size: 0.9em;
     }
 }
 
@@ -170,16 +190,18 @@
     }
 }
 
-.colorPalette {
-    width: 30em;
-    border: 2px solid #000;
-    text-align: left;
-
+.checker {
     /* Checkerboard background */
     background-color: #ddd;
     background-image: linear-gradient(45deg, #AAA 25%, transparent 25%, transparent 75%, #AAA 75%, #AAA), linear-gradient(45deg, #AAA 25%, transparent 25%, transparent 75%, #AAA 75%, #AAA);
     background-size:1em 1em;
     background-position:0 0, 0.5em 0.5em;
+}
+
+.colorPalette {
+    width: 30em;
+    border: 2px solid #000;
+    text-align: left;
 
     > div {
         display: inline-block;
@@ -207,7 +229,6 @@
         &:hover:after {
             content: " ";
             position: absolute;
-            background-color: inherit;
             left: -0.2em;
             top: -0.2em;
             width: 100%;
@@ -216,4 +237,61 @@
             border: 0.2em solid #f1c40f;
         }
     }
+}
+
+.similarColors {
+    margin: 1em;
+    width: 20em;
+    height: 6em;
+
+    > div {
+        display: inline-block;
+        width: 10em;
+        height: 3.5em;
+        padding-top: 2.5em;
+    }
+}
+
+.totalWeightPie {
+    max-width: 20em;
+    margin: 2em auto 4em;
+
+    canvas {
+        max-width: inherit;
+    }
+}
+
+.offenderProblem {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.imageOffenders {
+    display: table;
+    border-spacing: 3em;
+    width: 90%;
+
+    > div {
+        display: table-row;
+
+        > div {
+            display: table-cell;
+            vertical-align: middle;
+        }
+    }
+
+    img {
+        max-height: 10em;
+        max-width: 40em;
+        border: 1px solid #000;
+        margin-top: 0.5em;
+    }
+}
+
+.smallPreview {
+    display: block;
+    max-height: 4em;
+    max-width: 8em;
+    border: 1px solid #000;
+    margin: 1em auto 0.2em;
 }
